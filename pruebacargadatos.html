@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos desde Google Sheets</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Productos</h2>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>FAMILIA</th>
+                <th>PRODUCTO</th>
+                <th>DESCRIPCIÓN</th>
+                <th>PRECIO</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se cargarán aquí -->
+        </tbody>
+    </table>
+
+    <script>
+        async function cargarDatos() {
+            try {
+                const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyXC6GwAi6XiQM782lchykl-n0AOlb9Purnflp5SX_9mJOc9JORG2A-3CBWthXMAJdUNn7J6cT3fCP/pub?gid=0&single=true&output=csv";
+                
+                // Usar un proxy CORS confiable
+                const proxyURL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(csvURL);
+
+                const response = await fetch(proxyURL);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const csvData = await response.text();
+                
+                const rows = csvData.split(/\r?\n/).filter(row => row.trim() !== '');
+                const tbody = document.querySelector('#dataTable tbody');
+
+                rows.slice(1).forEach(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const tr = document.createElement('tr');
+                    
+                    cols.forEach((col, index) => {
+                        const td = document.createElement('td');
+                        let valor = col.replace(/^"|"$/g, '').trim();
+                        
+                        // Formatear precios
+                        if (index === 4) {
+                            valor = `$${parseFloat(valor).toFixed(2)}`;
+                        }
+                        
+                        td.textContent = valor;
+                        tr.appendChild(td);
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar datos. Verifica la consola.');
+            }
+        }
+
+        // Iniciar carga
+        cargarDatos();
+    </script>
+</body>
+</html>
