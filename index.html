@@ -10,16 +10,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-    <title>Tai Tara Colina</title>
+    <title>TaiTara Sushi Colina</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="shortcut icon" href="assets/img/n.png" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/img/pescado.png" type="image/x-icon">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><img src="assets/img/n.png" alt="" width="40px" height="40px"></a>
+            <a class="navbar-brand" href="#"><img src="assets/img/pescado.png" alt="" width="50px" height="40px"></a>
 
             <button class="navbar-toggler navbar-light" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -30,25 +30,17 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Nuestros productos</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="#" id="sobrenosotros-link">Sobre nosotros</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="comuniquemonos-link">Comuniquémonos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="reserva-link">Reserva</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
+
     <div id="popup-container">
         <div id="contenido-oculto">
             <!-- Contenido oculto -->
-            <h4>Nimrodel Pub Restaurant</h4>
+            <h4>TaiTara Sushi Colina</h4>
             <div id="carouselExampleControls" class="carousel slide">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
@@ -85,151 +77,37 @@
             <span id="cerrar-popup" style="cursor: pointer;">x</span>
         </div>
     </div>
-    <h1>TaiTara Sushi Colina</h1>
+
+    <!-- Logo de TaiTara -->
+    <img src="assets/img/logotaitara.png" alt="TaiTara Sushi Colina" class="logo-taitara">
+
     <h2>Los más vendidos</h2>
 
-    <!-- Tarjetas de productos más vendidos -->
-    <div class="cartas col-sm-8 col-md-10 col-lg-8 col-xl-8 mx-auto d-flex flex-column flex-md-row justify-content-center">
-        <div class="card col-md-4 col-xl-4 mx-2">
-            <img src="" class="card-img-top" alt="Producto 1">
-            <div class="card-body">
-                <h6 class="producto-nombre">Cargando...</h6>
-                <p class="fw-lighter fs-8 producto-descripcion">Cargando...</p>
-            </div>
+    <!-- Carrusel de productos más vendidos -->
+    <div id="carouselMasVendidos" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- Los productos más vendidos se cargarán aquí dinámicamente -->
         </div>
-        <div class="card col-md-4 col-xl-4 mx-2">
-            <img src="" class="card-img-top" alt="Producto 2">
-            <div class="card-body">
-                <h6 class="producto-nombre">Cargando...</h6>
-                <p class="fw-lighter fs-8 producto-descripcion">Cargando...</p>
-            </div>
-        </div>
-        <div class="card col-md-4 col-xl-4 mx-2">
-            <img src="" class="card-img-top" alt="Producto 3">
-            <div class="card-body">
-                <h6 class="producto-nombre">Cargando...</h6>
-                <p class="fw-lighter fs-8 producto-descripcion">Cargando...</p>
-            </div>
-        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMasVendidos" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselMasVendidos" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
 
+    <h2>Nuestra carta</h2>
     <!-- Contenedor para productos agrupados por familia -->
     <div id="productos-container">
         <!-- Las familias y productos se cargarán aquí dinámicamente -->
     </div>
     <br>
 
-    <!-- Formulario de contacto -->
-    <div class="contenedor d-none d-md-block">
-        <h3>Comuniquémonos</h3>
-        <form class="row g-3" id="formulario">
-            <div class="col-md-12">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Maria Vargas">
-                <div id="alerta-nombre" class="alerta"></div>
-            </div>
-            <div class="col-md-12">
-                <label for="correo" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="correo" name="correo" placeholder="mariavargas@correo.com">
-                <div id="alerta-correo" class="alerta"></div>
-            </div>
-            <div class="col-md-12">
-                <label for="telefono" class="form-label">Teléfono</label>
-                <input type="text" class="form-control" id="telefono" name="telefono" placeholder="951236874"
-                    maxlength="9">
-                <div id="alerta-telefono" class="alerta"></div>
-            </div>
-            <div class="col-md-12">
-                <label for="motivo" class="form-label">Motivo de consulta</label>
-                <input type="text" class="form-control" id="motivo" name="motivo"
-                    placeholder="Ej: Información de productos">
-                <div id="alerta-motivo" class="alerta"></div>
-            </div>
-
-            <div class="col-md-8 mx-auto">
-                <label for="mensaje" class="form-label">Mensaje</label>
-                <textarea class="form-control" id="mensaje" name="mensaje" style="height: 200px"></textarea>
-                <div id="alerta-mensaje" class="alerta"></div>
-            </div>
-
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </div>
-        </form>
-    </div>
-    <br>
-
-    <!-- Formulario de reserva -->
-    <div class="contenedor2 d-none d-md-block">
-        <h3>Reserva</h3>
-        <form class="row g-3">
-            <div class="col-md-12">
-                <label for="inputEmail4" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="inputEmail4" required placeholder="Maria Vargas">
-            </div>
-            <div class="col-md-12">
-                <label for="inputPassword4" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="inputPassword4" pattern="^[^@]+@[^@]+\.[a-zA-Z]{2,}$"
-                    required placeholder="mariavargas@correo.com">
-            </div>
-            <div class="col-md-12">
-                <label for="inputCity" class="form-label">Teléfono</label>
-                <input type="text" class="form-control" id="inputCity" required placeholder="951236874" maxlength="9">
-            </div>
-            <div class="col-md-12">
-                <label for="dateInput">Fecha</label>
-                <input type="date" class="form-control" id="dateInput" name="dateInput">
-            </div>
-            <div class="col-md-12">
-                <label for="horaInput">Hora</label>
-                <input type="time" class="form-control" id="horaInput" name="horaInput">
-            </div>
-            <div class="col-md-12">
-                <label for="validationCustom04" class="form-label">Cantidad de asistentes</label>
-                <select class="form-select" id="validationCustom04" required>
-                    <option selected disabled value="">0</option>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
-                    <option>6</option>
-                    <option>7</option>
-                </select>
-            </div>
-
-            <div class="col-12">
-                <button type="submit" id="botondereserva" class="btn btn-primary">Reservar</button>
-            </div>
-        </form>
-    </div>
 
     <br>
 
-    <!-- Carrusel de imágenes -->
-    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="assets/img/vino.jpg" class="d-block w-100" alt="1">
-            </div>
-            <div class="carousel-item">
-                <img src="assets/img/chorillana.jpg" class="d-block w-100" alt="2">
-            </div>
-            <div class="carousel-item">
-                <img src="assets/img/mojito.jpg" class="d-block w-100" alt="3">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
-            data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
-            data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
 
     <!-- Footer -->
     <footer id="piepagina">

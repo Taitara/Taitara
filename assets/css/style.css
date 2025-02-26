@@ -24,8 +24,7 @@
   
   /* Navbar */
   .navbar {
-    background-color: var(--dorado);
-    background-image: url('../img/fondo.jpg');
+    background-color: var(--esmeralda);
     background-size: cover;
     background-position: center;
     padding: 1rem 2rem;
@@ -384,4 +383,34 @@
     color: #777;
     font-size: 0.8rem;
     margin-top: 0.5rem;
+}
+/* Estilos para el carrusel de productos más vendidos */
+#carouselMasVendidos {
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+.carousel-item .card {
+  margin: 0 auto;
+  max-width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.carousel-item .card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.carousel-item .card-body {
+  padding: 1rem;
+  text-align: center;
+}
+.logo-taitara {
+  max-width: 90%; /* Ajusta el tamaño según sea necesario */
+  height: auto; /* Mantiene la proporción de la imagen */
+  display: block; /* Centra la imagen */
+  margin: 0 auto; /* Centra la imagen */
+  margin-top: 1rem; /* Espacio superior */
 }
