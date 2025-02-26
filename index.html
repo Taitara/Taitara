@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Nimrodel Pub</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="shortcut icon" href="assets/img/n.png" type="image/x-icon">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="assets/img/n.png" alt="" width="40px" height="40px"></a>
+
+            <button class="navbar-toggler navbar-light" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Nuestros productos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="sobrenosotros-link">Sobre nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="comuniquemonos-link">Comuniquémonos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="reserva-link">Reserva</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="popup-container">
+        <div id="contenido-oculto">
+            <!-- Contenido oculto -->
+            <h4>Nimrodel Pub Restaurant</h4>
+            <div id="carouselExampleControls" class="carousel slide">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <p>Nimrodel Significa “dama de la cueva blanca”. Fue una elfa silvana que vivió
+                            durante la Tercera Edad del Sol en el bosque de Lothlórien. En honor a su nombre, se acuña
+                            Nimrodel al río que nace en las Montañas Nubladas</p>
+                        <img src="assets/img/IMG2.jpg" class="d-block w-100" alt="1">
+                    </div>
+                    <div class="carousel-item">
+                        <p>Nimrodel Pub Restaurant es un oasis de calma y diversión, lleno de rincones acogedores
+                            en donde se resalta la belleza de su decoración élfica.
+                            Es un lugar ideal para visitar solo o acompañado, disfrutar una tarde con amigos, terminar
+                            el día después del trabajo o almorzar con tu familia.
+                            Puedes probar nuestras tradicionales tablas, en todas sus variedades y que nos han
+                            otorgado reconocimiento dentro de la cultura gastronómica.
+                            También puedes disfrutar nuestras cervezas de fabricación propia, con sabores que te
+                            llevarán a un mágico mundo.</p>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="assets/img/IMG1.jpg" class="d-block w-100" alt="2">
+                    </div>
+
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+            <span id="cerrar-popup" style="cursor: pointer;">x</span>
+        </div>
+    </div>
+    <h1>Nimrodel Pub Restaurant</h1>
+    <h2>Destacados de la semana</h2>
+
+    <div
+        class="cartas col-sm-8 col-md-10 col-lg-8 col-xl-8 mx-auto d-flex flex-column flex-md-row justify-content-center">
+        <div class="card col-md-4 col-xl-4 mx-2">
+            <img src="assets/img/bebidas.jpg" class="card-img-top" alt="GASEOSAS">
+            <div class="card-body">
+                <h6>GASEOSAS</h6>
+                <p class="fw-lighter fs-8">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+            </div>
+        </div>
+        <div class="card col-md-4 col-xl-4 mx-2">
+            <img src="assets/img/tablas.jpg" class="card-img-top" alt="TABLAS">
+            <div class="card-body">
+                <h6>TABLAS</h6>
+                <p class="fw-lighter fs-8">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+            </div>
+        </div>
+        <div class="card col-md-4 col-xl-4 mx-2">
+            <img src="assets/img/shop.jpeg" class="card-img-top" alt="SHOP">
+            <div class="card-body">
+                <h6>SHOP</h6>
+                <p class="fw-lighter fs-8">Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="contenedor d-none d-md-block">
+        <h3>Comuniquémonos</h3>
+        <form class="row g-3" id="formulario">
+            <div class="col-md-12">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Maria Vargas">
+                <div id="alerta-nombre" class="alerta"></div>
+            </div>
+            <div class="col-md-12">
+                <label for="correo" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="correo" name="correo" placeholder="mariavargas@correo.com">
+                <div id="alerta-correo" class="alerta"></div>
+            </div>
+            <div class="col-md-12">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="telefono" name="telefono" placeholder="951236874"
+                    maxlength="9">
+                <div id="alerta-telefono" class="alerta"></div>
+            </div>
+            <div class="col-md-12">
+                <label for="motivo" class="form-label">Motivo de consulta</label>
+                <input type="text" class="form-control" id="motivo" name="motivo"
+                    placeholder="Ej: Información de productos">
+                <div id="alerta-motivo" class="alerta"></div>
+            </div>
+
+            <div class="col-md-8 mx-auto">
+                <label for="mensaje" class="form-label">Mensaje</label>
+                <textarea class="form-control" id="mensaje" name="mensaje" style="height: 200px"></textarea>
+                <div id="alerta-mensaje" class="alerta"></div>
+            </div>
+
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+        </form>
+    </div>
+    <br>
+
+    <div class="contenedor2 d-none d-md-block">
+        <h3>Reserva</h3>
+        <form class="row g-3">
+            <div class="col-md-12">
+                <label for="inputEmail4" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="inputEmail4" required placeholder="Maria Vargas">
+            </div>
+            <div class="col-md-12">
+                <label for="inputPassword4" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="inputPassword4" pattern="^[^@]+@[^@]+\.[a-zA-Z]{2,}$"
+                    required placeholder="mariavargas@correo.com">
+            </div>
+            <div class="col-md-12">
+                <label for="inputCity" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="inputCity" required placeholder="951236874" maxlength="9">
+            </div>
+            <div class="col-md-12">
+                <label for="dateInput">Fecha</label>
+                <input type="date" class="form-control" id="dateInput" name="dateInput">
+            </div>
+            <div class="col-md-12">
+                <label for="horaInput">Hora</label>
+                <input type="time" class="form-control" id="horaInput" name="horaInput">
+            </div>
+            <div class="col-md-12">
+                <label for="validationCustom04" class="form-label">Cantidad de asistentes</label>
+                <select class="form-select" id="validationCustom04" required>
+                    <option selected disabled value="">0</option>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <button type="submit" id="botondereserva" class="btn btn-primary">Reservar</button>
+            </div>
+        </form>
+    </div>
+
+    <br>
+
+    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="assets/img/vino.jpg" class="d-block w-100" alt="1">
+            </div>
+            <div class="carousel-item">
+                <img src="assets/img/chorillana.jpg" class="d-block w-100" alt="2">
+            </div>
+            <div class="carousel-item">
+                <img src="assets/img/mojito.jpg" class="d-block w-100" alt="3">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <footer id="piepagina">
+        <p id="marcaregistrada">Todos los derechos reservados &reg;</p>
+    </footer>
+
+
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+
+    <script src="Assets/JS/index.js"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+-->
+</body>
+
+</html>
