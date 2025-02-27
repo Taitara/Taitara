@@ -26,7 +26,7 @@ async function cargarDatos() {
                 cantidadVendida: parseInt(cols[5].replace(/^"|"$/g, '').trim()), // Leer cantidad vendida
                 imagen: cols[6].replace(/^"|"$/g, '').trim() // Leer el nombre de la imagen
             };
-        
+
             if (!familias[familia]) {
                 familias[familia] = [];
             }
@@ -51,11 +51,19 @@ async function cargarDatos() {
                 const productoCard = document.createElement('div');
                 productoCard.className = 'producto-card';
                 productoCard.innerHTML = `
-                    <p class="producto-id">Cod. Producto: ${producto.id}</p> <!-- Cambiado a "Cod. Producto" -->
+                    <p class="producto-id">Cod. Producto: ${producto.id}</p>
+                    <img src="assets/img/${producto.imagen}" class="producto-imagen" alt="${producto.nombre}">
                     <h4 class="producto-nombre">${producto.nombre}</h4>
                     <p class="producto-descripcion">${producto.descripcion}</p>
                     <p class="producto-precio">${producto.precio}</p>
                 `;
+            
+                // Agregar evento de clic para mostrar/ocultar la imagen
+                productoCard.addEventListener('click', () => {
+                    const imagen = productoCard.querySelector('.producto-imagen');
+                    imagen.classList.toggle('visible'); // Alternar la visibilidad de la imagen
+                });
+            
                 productosGrid.appendChild(productoCard);
             });
 
@@ -101,4 +109,3 @@ function mostrarProductosMasVendidos(productos) {
 
 // Iniciar carga de datos al cargar la página
 document.addEventListener("DOMContentLoaded", cargarDatos);
-
