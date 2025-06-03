@@ -480,3 +480,18 @@
   width: 30px; /* Tamaño del logo */
   height: 30px;
 }
+#descargar-carta {
+    background-color: var(--esmeralda);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: auto; /* Esto empuja el botón hacia la derecha */
+}
+
+#descargar-carta:hover {
+    background-color: var(--salmon);
+}
