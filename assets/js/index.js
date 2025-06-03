@@ -364,8 +364,6 @@ async function generarPDF() {
 
 
 
-
-
 // Función para mostrar los 3 productos más vendidos en el carrusel
 function mostrarProductosMasVendidos(productos) {
     const productosOrdenados = productos.sort((a, b) => b.cantidadVendida - a.cantidadVendida);
