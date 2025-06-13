@@ -49,12 +49,32 @@ async function cargarDatos() {
             const productosGrid = familiaSection.querySelector('.productos-grid');
             familias[familia].forEach(producto => {
                 const productoCard = document.createElement('div');
-                productoCard.className = 'producto-card';
+                
+                // Verificar si la familia es "Promociones" para aplicar clase especial
+                const esPromocion = familia.toLowerCase() === 'promociones';
+                productoCard.className = esPromocion ? 'producto-card promocion-card' : 'producto-card';
+                
+                // Procesar descripción para promociones
+                let descripcionHTML = producto.descripcion;
+                if (esPromocion) {
+                    if (descripcionHTML.includes('|')) {
+                        // Dividir por | y procesar cada línea
+                        const lineas = descripcionHTML.split('|');
+                        descripcionHTML = lineas.map(linea => {
+                            // Buscar texto antes de : y ponerlo en negrita
+                            return linea.trim().replace(/^([^:]+)(:)/g, '<strong>$1</strong>$2');
+                        }).join('<br>');
+                    } else {
+                        // Si no hay |, pero es promoción, buscar texto antes de : y ponerlo en negrita
+                        descripcionHTML = descripcionHTML.replace(/^([^:]+)(:)/g, '<strong>$1</strong>$2');
+                    }
+                }
+                
                 productoCard.innerHTML = `
                     <p class="producto-id">Cod. Producto: ${producto.id}</p>
                     <img src="assets/img/${producto.imagen}" class="producto-imagen" alt="${producto.nombre}">
                     <h4 class="producto-nombre">${producto.nombre}</h4>
-                    <p class="producto-descripcion">${producto.descripcion}</p>
+                    <p class="producto-descripcion ${esPromocion ? 'descripcion-promocion' : ''}">${descripcionHTML}</p>
                     <p class="producto-precio">${producto.precio}</p>
                 `;
             
@@ -246,8 +266,19 @@ async function generarPDF() {
 
                 // === PRODUCTOS DE LA FAMILIA ===
                 familias[familia].forEach((prod, prodIndex) => {
+                    // Procesar descripción para promociones en PDF
+                    let descripcionPDF = prod.descripcion;
+                    const esPromocion = familia.toLowerCase() === 'promociones';
+                    
                     // Calcular espacio necesario para el producto
-                    const espacioNecesario = prod.descripcion && prod.descripcion.trim() !== '' ? 12 : 9;
+                    let espacioNecesario;
+                    if (esPromocion && descripcionPDF.includes('|')) {
+                        // Para promociones con múltiples líneas, calcular espacio extra
+                        const lineasDescripcion = descripcionPDF.split('|').length;
+                        espacioNecesario = 9 + (lineasDescripcion * 4); // Espacio base + líneas extra
+                    } else {
+                        espacioNecesario = prod.descripcion && prod.descripcion.trim() !== '' ? 12 : 9;
+                    }
                     
                     // Control de página para productos
                     if (y > pageHeight - espacioNecesario) {
@@ -307,9 +338,61 @@ async function generarPDF() {
                         doc.setTextColor(...grayDark);
                         doc.setFontSize(7);
                         doc.setFont('helvetica', 'italic');
-                        doc.text(prod.descripcion, margin + 3, y); // Indentado 3 puntos
                         
-                        y += 7; //espacio después de descripción
+                        if (esPromocion && descripcionPDF.includes('|')) {
+                            // Para promociones, dividir por | y mostrar cada línea
+                            const lineas = descripcionPDF.split('|');
+                            lineas.forEach((linea, index) => {
+                                const lineaLimpia = linea.trim();
+                                
+                                // Buscar texto antes de : para ponerlo en negrita
+                                const colonIndex = lineaLimpia.indexOf(':');
+                                if (colonIndex > 0) {
+                                    const nombreSubProducto = lineaLimpia.substring(0, colonIndex);
+                                    const restoTexto = lineaLimpia.substring(colonIndex);
+                                    
+                                    // Nombre del sub-producto en negrita
+                                    doc.setFont('helvetica', 'bold');
+                                    doc.text(nombreSubProducto, margin + 3, y);
+                                    
+                                    // Calcular posición para el resto del texto
+                                    const anchoNombre = doc.getTextWidth(nombreSubProducto);
+                                    
+                                    // Resto del texto en cursiva normal
+                                    doc.setFont('helvetica', 'italic');
+                                    doc.text(restoTexto, margin + 3 + anchoNombre, y);
+                                } else {
+                                    // Si no hay :, texto normal
+                                    doc.text(lineaLimpia, margin + 3, y);
+                                }
+                                y += 4; // Espacio entre líneas
+                            });
+                            y += 3; // Espacio después de todas las líneas
+                        } else if (esPromocion) {
+                            // Para promociones sin |, pero con :
+                            const colonIndex = descripcionPDF.indexOf(':');
+                            if (colonIndex > 0) {
+                                const nombreSubProducto = descripcionPDF.substring(0, colonIndex);
+                                const restoTexto = descripcionPDF.substring(colonIndex);
+                                
+                                // Nombre del sub-producto en negrita
+                                doc.setFont('helvetica', 'bold');
+                                doc.text(nombreSubProducto, margin + 3, y);
+                                
+                                // Calcular posición para el resto del texto
+                                const anchoNombre = doc.getTextWidth(nombreSubProducto);
+                                
+                                // Resto del texto en cursiva normal
+                                doc.setFont('helvetica', 'italic');
+                                doc.text(restoTexto, margin + 3 + anchoNombre, y);
+                            } else {
+                                doc.text(descripcionPDF, margin + 3, y);
+                            }
+                            y += 7; // Espacio después de descripción
+                        } else {
+                            doc.text(descripcionPDF, margin + 3, y); // Indentado 3 puntos
+                            y += 7; // Espacio después de descripción
+                        }
                     } else {
                         y += 1; // Espacio mínimo si no hay descripción
                     }
@@ -362,8 +445,6 @@ async function generarPDF() {
     }
 }
 
-
-
 // Función para mostrar los 3 productos más vendidos en el carrusel
 function mostrarProductosMasVendidos(productos) {
     const productosOrdenados = productos.sort((a, b) => b.cantidadVendida - a.cantidadVendida);
@@ -389,4 +470,4 @@ function mostrarProductosMasVendidos(productos) {
 }
 
 // Iniciar carga de datos al cargar la página
-document.addEventListener("DOMContentLoaded", cargarDatos);  
+document.addEventListener("DOMContentLoaded", cargarDatos);
