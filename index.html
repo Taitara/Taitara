@@ -1,97 +1,122 @@
-<!doctype html>
-<html lang="es">
-
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-    <title>TaiTara Sushi Colina</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="shortcut icon" href="assets/img/pescado.png" type="image/x-icon">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taitara – Carta Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
 <body>
-    
-<nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container-fluid d-flex align-items-center">
-        <a class="navbar-brand" href="#"><img src="assets/img/pescado.png" alt="" width="50px" height="40px"></a>
-        
-        <button id="descargar-carta" class="btn btn-success">Descargar Carta</button>
-    </div>
-</nav>
 
-    <!-- Logo de TaiTara -->
-    <img src="assets/img/logotaitara.png" alt="TaiTara Sushi Colina" class="logo-taitara">
-    <br>
-    <div class="redes-sociales">
-        <a href="https://www.facebook.com/taitaracolina/" class="red-social-link">
-            <img src="assets/img/facebook.png" alt="Facebook" class="red-social-logo">
-        </a>
-        <a href="https://www.instagram.com/taitara_/" class="red-social-link">
-            <img src="assets/img/instagram.png" alt="Instagram" class="red-social-logo">
-        </a>
-        <a href="http://wa.me/56975316163" class="red-social-link">
-            <img src="assets/img/whatsapp.png" alt="WhatsApp" class="red-social-logo">
-        </a>
-        <a href="https://maps.app.goo.gl/C3djHZjVDe1TUdVa9" class="red-social-link">
-            <img src="assets/img/ping.png" alt="Ubicacion" class="red-social-logo">
-        </a>
-    </div>
-
-    <h2>Los más vendidos</h2>
-
-    <!-- Carrusel de productos más vendidos -->
-    <div id="carouselMasVendidos" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <!-- Los productos más vendidos se cargarán aquí dinámicamente -->
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMasVendidos" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
+  <header class="navbar" id="top">
+    <div class="navbar-inner">
+      <a href="#top" class="brand">
+        <img src="assets/img/logotaitara.png" alt="Taitara" class="logo-img"
+             onerror="this.style.display='none';document.querySelector('.brand-text').style.display='block'">
+        <span class="brand-text" style="display:none">TAITARA</span>
+      </a>
+      <div class="navbar-actions">
+        <button class="btn-dark-toggle" data-theme-toggle aria-label="Cambiar tema">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselMasVendidos" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
+        <button class="btn-pdf" id="descargar-carta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Carta PDF
         </button>
+      </div>
     </div>
+  </header>
 
-    <h2>Nuestra carta</h2>
-    <!-- Contenedor para productos agrupados por familia -->
-    <div id="productos-container">
-        <!-- Las familias y productos se cargarán aquí dinámicamente -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-tag">Sushi &amp; Rolls · Delivery &amp; Local</p>
+      <h1 class="hero-title">Nuestra<br><em>Carta</em></h1>
+      <p class="hero-sub">Explora todos nuestros rolls, niguiris y especialidades.<br>Precios siempre actualizados.</p>
+      <a href="#carta" class="btn-primary-hero">Ver carta completa ↓</a>
     </div>
-    <br>
+  </section>
 
-    <br>
+  <section class="section-top" id="top-vendidos">
+    <div class="section-container">
+      <h2 class="section-title">⭐ Los más pedidos</h2>
+      <div id="carrusel-top" class="top-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+  </section>
 
+  <section class="section-search">
+    <div class="section-container">
+      <div class="search-wrap">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="buscador" placeholder="Buscar producto…" autocomplete="off" />
+        <button id="btn-clear-search" aria-label="Limpiar" style="display:none">✕</button>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer estático -->
-    <div class="footer-estatico">
-        <a href="http://wa.me/56975316163" class="whatsapp-link">
-            <img src="assets/img/whatsapp.png" alt="WhatsApp" class="whatsapp-logo">
-            <span>Pide a nuestro WhatsApp</span>
+  <main class="section-carta" id="carta">
+    <div class="section-container">
+      <div id="productos-container">
+        <div class="skeleton-familia"></div>
+        <div class="skeleton-familia"></div>
+        <div class="skeleton-familia"></div>
+        <div class="skeleton-familia"></div>
+      </div>
+      <div id="no-resultados" class="empty-state" style="display:none">
+        <div class="empty-icon">🔍</div>
+        <p>No encontramos "<span id="busqueda-texto"></span>"</p>
+        <button onclick="document.getElementById('buscador').value='';triggerSearch()">Limpiar búsqueda</button>
+      </div>
+    </div>
+  </main>
+
+  <section class="section-contacto">
+    <div class="section-container">
+      <h2 class="section-title">Contáctanos</h2>
+      <div class="redes-grid">
+        <a href="https://wa.me/56975316163" target="_blank" rel="noopener" class="red-social-btn whatsapp">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          WhatsApp
         </a>
+        <a href="https://instagram.com/taitara_" target="_blank" rel="noopener" class="red-social-btn instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+          Instagram
+        </a>
+      </div>
     </div>
+  </section>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+  <footer class="footer">
+    <p>© 2026 Taitara · Todos los derechos reservados</p>
+  </footer>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
-        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <a href="https://wa.me/56975316163" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Pedir por WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+    </svg>
+  </a>
 
-    <!-- Script personalizado -->
-    <script src="assets/js/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+  <script src="assets/js/index.js"></script>
 </body>
-
 </html>

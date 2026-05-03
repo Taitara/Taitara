@@ -1,473 +1,449 @@
-async function cargarDatos() {
+/* ============================================================
+   TAITARA – index.js
+   Estructura CSV: FAMILIA | PRODUCTO | DESCRIPCION | PRECIO
+   Los precios vienen formateados desde el Sheet ($5.700)
+   ============================================================ */
+
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyXC6GwAi6XiQM782lchykl-n0AOlb9Purnflp5SX_9mJOc9JORG2A-3CBWthXMAJdUNn7J6cT3fCP/pub?output=csv";
+
+const PROXIES = [
+  (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u) => `https://thingproxy.freeboard.io/fetch/${u}`,
+  (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+];
+
+let todosLosProductos = [];
+let familiaData = {};
+let ordenFamilias = [];
+
+/* ── Dark mode toggle ── */
+(function () {
+  const toggle = document.querySelector('[data-theme-toggle]');
+  const root = document.documentElement;
+  
+  // Siempre arranca en light, dark es opcional
+  let theme = 'light';
+  root.setAttribute('data-theme', theme);
+
+  const sunSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+  const moonSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+  if (toggle) {
+    toggle.innerHTML = moonSVG; // empieza mostrando luna (para ir a dark)
+    toggle.setAttribute('aria-label', 'Activar modo oscuro');
+    toggle.addEventListener('click', () => {
+      theme = theme === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', theme);
+      toggle.innerHTML = theme === 'dark' ? sunSVG : moonSVG;
+      toggle.setAttribute('aria-label', theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro');
+    });
+  }
+})();
+
+/* ── Fetch con fallback de proxies ── */
+async function fetchCSV() {
+  for (const proxyFn of PROXIES) {
     try {
-        const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyXC6GwAi6XiQM782lchykl-n0AOlb9Purnflp5SX_9mJOc9JORG2A-3CBWthXMAJdUNn7J6cT3fCP/pub?gid=0&single=true&output=csv";
-        const proxyURL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(csvURL);
-
-        const response = await fetch(proxyURL);
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
-        const csvData = await response.text();
-        const rows = csvData.split(/\r?\n/).filter(row => row.trim() !== '');
-        const productosContainer = document.getElementById('productos-container');
-
-        // Agrupar productos por familia
-        const familias = {};
-        const todosLosProductos = []; // Para almacenar todos los productos
-
-        rows.slice(1).forEach(row => {
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            const familia = cols[1].replace(/^"|"$/g, '').trim();
-            const producto = {
-                id: cols[0].replace(/^"|"$/g, '').trim(),
-                familia: familia,
-                nombre: cols[2].replace(/^"|"$/g, '').trim(),
-                descripcion: cols[3].replace(/^"|"$/g, '').trim(),
-                precio: `$${parseInt(cols[4].replace(/^"|"$/g, '').trim())}`, // Quitar decimales
-                cantidadVendida: parseInt(cols[5].replace(/^"|"$/g, '').trim()), // Leer cantidad vendida
-                imagen: cols[6].replace(/^"|"$/g, '').trim() // Leer el nombre de la imagen
-            };
-
-            if (!familias[familia]) {
-                familias[familia] = [];
-            }
-            familias[familia].push(producto);
-            todosLosProductos.push(producto); // Agregar a la lista de todos los productos
-        });
-
-        // Mostrar los 3 productos más vendidos en el carrusel
-        mostrarProductosMasVendidos(todosLosProductos);
-
-        // Crear secciones para cada familia
-        for (const familia in familias) {
-            const familiaSection = document.createElement('div');
-            familiaSection.className = 'familia-section';
-            familiaSection.innerHTML = `
-                <h3 class="familia-titulo">${familia} <span class="toggle-icon">+</span></h3>
-                <div class="productos-grid" style="display: none;"></div>
-            `;
-
-            const productosGrid = familiaSection.querySelector('.productos-grid');
-            familias[familia].forEach(producto => {
-                const productoCard = document.createElement('div');
-                
-                // Verificar si la familia es "Promociones" para aplicar clase especial
-                const esPromocion = familia.toLowerCase() === 'promociones';
-                productoCard.className = esPromocion ? 'producto-card promocion-card' : 'producto-card';
-                
-                // Procesar descripción para promociones
-                let descripcionHTML = producto.descripcion;
-                if (esPromocion) {
-                    if (descripcionHTML.includes('|')) {
-                        // Dividir por | y procesar cada línea
-                        const lineas = descripcionHTML.split('|');
-                        descripcionHTML = lineas.map(linea => {
-                            // Buscar texto antes de : y ponerlo en negrita
-                            return linea.trim().replace(/^([^:]+)(:)/g, '<strong>$1</strong>$2');
-                        }).join('<br>');
-                    } else {
-                        // Si no hay |, pero es promoción, buscar texto antes de : y ponerlo en negrita
-                        descripcionHTML = descripcionHTML.replace(/^([^:]+)(:)/g, '<strong>$1</strong>$2');
-                    }
-                }
-                
-                productoCard.innerHTML = `
-                    <p class="producto-id">Cod. Producto: ${producto.id}</p>
-                    <img src="assets/img/${producto.imagen}" class="producto-imagen" alt="${producto.nombre}">
-                    <h4 class="producto-nombre">${producto.nombre}</h4>
-                    <p class="producto-descripcion ${esPromocion ? 'descripcion-promocion' : ''}">${descripcionHTML}</p>
-                    <p class="producto-precio">${producto.precio}</p>
-                `;
-            
-                // Agregar evento de clic para mostrar/ocultar la imagen
-                productoCard.addEventListener('click', () => {
-                    const imagen = productoCard.querySelector('.producto-imagen');
-                    imagen.classList.toggle('visible'); // Alternar la visibilidad de la imagen
-                });
-            
-                productosGrid.appendChild(productoCard);
-            });
-
-            // Agregar evento de clic al título de la familia
-            const familiaTitulo = familiaSection.querySelector('.familia-titulo');
-            familiaTitulo.addEventListener('click', () => {
-                productosGrid.style.display = productosGrid.style.display === 'none' ? 'grid' : 'none';
-                const toggleIcon = familiaTitulo.querySelector('.toggle-icon');
-                toggleIcon.textContent = productosGrid.style.display === 'none' ? '+' : '-';
-            });
-
-            productosContainer.appendChild(familiaSection);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(proxyFn(CSV_URL), { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.includes(',') && text.split('\n').length > 1) {
+          console.log('✅ CSV cargado OK');
+          return text;
         }
-    } catch (error) {
-        console.error('Error al cargar datos:', error);
-        alert('Hubo un error al cargar los datos. Por favor, inténtalo de nuevo más tarde.');
+      }
+    } catch (e) {
+      console.warn('Proxy falló, probando siguiente…', e.message);
     }
+  }
+  throw new Error('No se pudo cargar el CSV con ningún proxy.');
+}
+
+/* ── Parser CSV respetando comillas ── */
+function parseCSVRow(row) {
+  const result = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(cur.trim());
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+/* ── Precio: respetar formato CLP del Sheet ── */
+function formatPrecio(raw) {
+  if (!raw) return '';
+  const s = raw.toString().trim();
+  if (s.startsWith('$')) return s;
+  const n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
+  if (isNaN(n)) return s;
+  return '$' + Math.round(n).toLocaleString('es-CL');
+}
+
+/* ── Cargar datos ── */
+async function cargarDatos() {
+  try {
+    const csvData = await fetchCSV();
+    const rows = csvData.split(/\r?\n/).filter(r => r.trim() !== '');
+
+    familiaData = {};
+    ordenFamilias = [];
+    todosLosProductos = [];
+
+    const header = parseCSVRow(rows[0]).map(h => h.toUpperCase().trim());
+    const cFam  = header.indexOf('FAMILIA')     >= 0 ? header.indexOf('FAMILIA')     : 0;
+    const cNom  = header.indexOf('PRODUCTO')    >= 0 ? header.indexOf('PRODUCTO')    : 1;
+    const cDesc = header.indexOf('DESCRIPCION') >= 0 ? header.indexOf('DESCRIPCION') : 2;
+    const cPre  = header.indexOf('PRECIO')      >= 0 ? header.indexOf('PRECIO')      : 3;
+    const cVend = header.indexOf('CANTIDAD VENDIDA') >= 0 ? header.indexOf('CANTIDAD VENDIDA') : 4;
+
+    rows.slice(1).forEach((row, idx) => {
+      const cols = parseCSVRow(row);
+      if (cols.length < 3) return;
+      const familia = cols[cFam] || 'General';
+      const nombre  = cols[cNom] || '';
+      if (!nombre) return;
+
+      const prod = {
+        familia:         familia,
+        nombre:          nombre,
+        descripcion:     cols[cDesc] || '',
+        precio:          formatPrecio(cols[cPre] || ''),
+        cantidadVendida: parseInt(cols[cVend]) || 0,
+      };
+
+      if (!familiaData[familia]) {
+        familiaData[familia] = [];
+        ordenFamilias.push(familia);
+      }
+      familiaData[familia].push(prod);
+      todosLosProductos.push(prod);
+    });
+
+    mostrarTopVendidos(todosLosProductos);
+    renderizarCarta(familiaData, ordenFamilias);
+
+  } catch (err) {
+    console.error('Error al cargar datos:', err);
+    document.getElementById('carrusel-top').innerHTML = '';
+    document.getElementById('productos-container').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p>No pudimos cargar la carta.<br>Verifica tu conexión e intenta de nuevo.</p>
+        <button onclick="location.reload()">🔄 Reintentar</button>
+      </div>`;
+  }
+}
+
+/* ── Top 3 más vendidos ── */
+function mostrarTopVendidos(productos) {
+  const top = [...productos]
+    .filter(p => p.cantidadVendida > 0)
+    .sort((a, b) => b.cantidadVendida - a.cantidadVendida)
+    .slice(0, 3);
+  const container = document.getElementById('carrusel-top');
+  if (!top.length) {
+    container.innerHTML = `
+      <p style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0">
+        Agrega una columna <strong>CANTIDAD</strong> en tu Sheet con las unidades vendidas para ver los más pedidos aquí.
+      </p>`;
+    return;
+  }
+  const medallas = ['🥇', '🥈', '🥉'];
+  container.innerHTML = top.map((p, i) => `
+    <div class="top-card">
+      <span class="top-card-badge">${medallas[i]} Top ${i + 1}</span>
+      <div class="top-card-familia">${p.familia}</div>
+      <div class="top-card-nombre">${p.nombre}</div>
+      ${p.descripcion ? `<div class="top-card-desc">${p.descripcion}</div>` : ''}
+      <div class="top-card-precio">${p.precio}</div>
+    </div>`).join('');
+}
+
+/* ── Renderizar carta ── */
+function renderizarCarta(familias, orden) {
+  const container = document.getElementById('productos-container');
+  container.innerHTML = '';
+
+  orden.forEach(familia => {
+    const prods = familias[familia];
+    const section = document.createElement('div');
+    section.className = 'familia-section';
+    section.dataset.familia = familia.toLowerCase();
+
+    const titulo = document.createElement('div');
+    titulo.className = 'familia-titulo';
+    titulo.innerHTML = `
+      <span>${familia}<span class="familia-titulo-tag">${prods.length} items</span></span>
+      <span class="toggle-icon">+</span>`;
+
+    const grid = document.createElement('div');
+    grid.className = 'productos-grid';
+
+    prods.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'producto-card';
+      card.dataset.nombre = p.nombre.toLowerCase();
+      card.dataset.desc = p.descripcion.toLowerCase();
+
+      const esPromo = familia.toLowerCase().includes('promo');
+      let descHTML = '';
+      if (p.descripcion) {
+        if (esPromo && p.descripcion.includes('|')) {
+          const lineas = p.descripcion.split('|').map(l => l.trim()).join('\n');
+          descHTML = `<div class="prod-desc promo-desc">${lineas}</div>`;
+        } else {
+          descHTML = `<div class="prod-desc">${p.descripcion}</div>`;
+        }
+      }
+
+      card.innerHTML = `
+        <div class="prod-info">
+          <div class="prod-nombre">${p.nombre}</div>
+          ${descHTML}
+        </div>
+        <div class="prod-precio">${p.precio}</div>`;
+      grid.appendChild(card);
+    });
+
+    titulo.addEventListener('click', () => {
+      const open = grid.classList.toggle('visible');
+      titulo.classList.toggle('open', open);
+    });
+
+    section.appendChild(titulo);
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+/* ── Buscador ── */
+function triggerSearch() {
+  const q = document.getElementById('buscador').value.toLowerCase().trim();
+  document.getElementById('btn-clear-search').style.display = q ? 'block' : 'none';
+  let totalVisibles = 0;
+
+  document.querySelectorAll('.familia-section').forEach(sec => {
+    const cards = sec.querySelectorAll('.producto-card');
+    let visibles = 0;
+    cards.forEach(card => {
+      const match = !q ||
+        card.dataset.nombre.includes(q) ||
+        card.dataset.desc.includes(q) ||
+        sec.dataset.familia.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visibles++;
+    });
+    if (visibles > 0) {
+      sec.style.display = '';
+      totalVisibles += visibles;
+      if (q) {
+        sec.querySelector('.productos-grid').classList.add('visible');
+        sec.querySelector('.familia-titulo').classList.add('open');
+      }
+    } else {
+      sec.style.display = q ? 'none' : '';
+    }
+  });
+
+  const noRes = document.getElementById('no-resultados');
+  noRes.style.display = (q && totalVisibles === 0) ? 'block' : 'none';
+  if (q && totalVisibles === 0)
+    document.getElementById('busqueda-texto').textContent = q;
+}
+
+document.getElementById('buscador').addEventListener('input', triggerSearch);
+document.getElementById('btn-clear-search').addEventListener('click', () => {
+  document.getElementById('buscador').value = '';
+  triggerSearch();
+});
+
+/* ── Generar PDF ── */
+async function generarPDF() {
+  const btn = document.getElementById('descargar-carta');
+  btn.innerHTML = '⏳ Generando…';
+  btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, H = 297, margin = 14, contentW = W - margin * 2;
+    let y = 0;
+
+    const cNegro  = [26, 26, 26];
+    const cSalmon = [232, 96, 26];
+    const cGray   = [120, 120, 120];
+    const cCream  = [255, 248, 243];
+    const cWhite  = [255, 255, 255];
+
+    /* Header negro + línea salmón */
+    doc.setFillColor(...cNegro);
+    doc.rect(0, 0, W, 44, 'F');
+    doc.setFillColor(...cSalmon);
+    doc.rect(0, 44, W, 3, 'F');
+
+    /* Logo — se intenta cargar y se invierte a blanco para que se vea sobre fondo negro */
+    await new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const ratio = img.width / img.height;
+          const lH = 24, lW = lH * ratio;
+          doc.addImage(canvas.toDataURL('image/png'), 'PNG', (W - lW) / 2, (44 - lH) / 2, lW, lH);
+        } catch (e) { logoTexto(); }
+        resolve();
+      };
+      img.onerror = () => { logoTexto(); resolve(); };
+      img.src = 'assets/img/logotaitara.png';
+      function logoTexto() {
+        doc.setTextColor(...cWhite); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+        doc.text('TAITARA', W / 2, 20, { align: 'center' });
+        doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...cSalmon);
+        doc.text('SUSHI & ROLLS', W / 2, 30, { align: 'center' });
+      }
+    });
+
+    y = 57;
+    const fecha = new Date().toLocaleDateString('es-CL', { day: '2-digit', month: 'long', year: 'numeric' });
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'italic'); doc.setTextColor(...cGray);
+    doc.text(`Carta actualizada: ${fecha}`, W - margin, y - 4, { align: 'right' });
+
+    /* Usar datos ya en memoria o recargar */
+    let csvFam = familiaData, csvOrd = ordenFamilias;
+    if (!csvOrd.length) {
+      try {
+        const csvData = await fetchCSV();
+        const rows = csvData.split(/\r?\n/).filter(r => r.trim() !== '');
+        const hdr = parseCSVRow(rows[0]).map(h => h.toUpperCase().trim());
+        const cF = hdr.indexOf('FAMILIA')     >= 0 ? hdr.indexOf('FAMILIA')     : 0;
+        const cN = hdr.indexOf('PRODUCTO')    >= 0 ? hdr.indexOf('PRODUCTO')    : 1;
+        const cD = hdr.indexOf('DESCRIPCION') >= 0 ? hdr.indexOf('DESCRIPCION') : 2;
+        const cP = hdr.indexOf('PRECIO')      >= 0 ? hdr.indexOf('PRECIO')      : 3;
+        csvFam = {}; csvOrd = [];
+        rows.slice(1).forEach(row => {
+          const cols = parseCSVRow(row);
+          if (cols.length < 3 || !cols[cN]) return;
+          const fam = cols[cF] || 'General';
+          const prod = { nombre: cols[cN], descripcion: cols[cD] || '', precio: formatPrecio(cols[cP] || '') };
+          if (!csvFam[fam]) { csvFam[fam] = []; csvOrd.push(fam); }
+          csvFam[fam].push(prod);
+        });
+      } catch (e) { console.error(e); }
+    }
+
+    const pageH = H - 18;
+    function checkPage(needed = 10) {
+      if (y + needed > pageH) { doc.addPage(); y = 20; }
+    }
+
+    csvOrd.forEach(familia => {
+      checkPage(18);
+      doc.setFillColor(...cNegro);
+      doc.roundedRect(margin, y, contentW, 10, 2, 2, 'F');
+      doc.setTextColor(...cWhite); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+      doc.text(familia.toUpperCase(), margin + 4, y + 6.8);
+      doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...cSalmon);
+      doc.text(`${csvFam[familia].length} items`, W - margin - 2, y + 6.8, { align: 'right' });
+      y += 13;
+      doc.setDrawColor(...cSalmon); doc.setLineWidth(0.25);
+      doc.line(margin, y - 1, W - margin, y - 1);
+
+      csvFam[familia].forEach((prod, idx) => {
+        const esPromo = familia.toLowerCase().includes('promo');
+        const nL = (esPromo && prod.descripcion && prod.descripcion.includes('|'))
+          ? prod.descripcion.split('|').length
+          : (prod.descripcion && prod.descripcion.trim() ? 1 : 0);
+        const needed = 7 + (nL > 1 ? nL * 3.8 + 2 : nL * 3.5 + 1);
+        checkPage(needed);
+
+        if (idx % 2 === 0) {
+          doc.setFillColor(...cCream);
+          doc.rect(margin, y - 0.5, contentW, needed + 0.5, 'F');
+        }
+
+        doc.setTextColor(...cNegro); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+        const nombreStr = doc.splitTextToSize(prod.nombre, contentW - 28)[0];
+        doc.text(nombreStr, margin + 2, y + 3.5);
+
+        const xDespN = margin + 2 + doc.getTextWidth(nombreStr) + 2;
+        const xAntesP = W - margin - doc.getTextWidth(prod.precio) - 2;
+        const puntos = '.'.repeat(Math.max(3, Math.floor((xAntesP - xDespN) / doc.getTextWidth('.'))));
+        doc.setTextColor(190, 190, 190); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+        doc.text(puntos, xDespN, y + 3.5);
+
+        doc.setTextColor(...cSalmon); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+        doc.text(prod.precio, W - margin - 1, y + 3.5, { align: 'right' });
+        y += 5.5;
+
+        if (prod.descripcion && prod.descripcion.trim()) {
+          doc.setFontSize(7); doc.setFont('helvetica', 'italic'); doc.setTextColor(105, 105, 105);
+          if (esPromo && prod.descripcion.includes('|')) {
+            prod.descripcion.split('|').forEach(linea => {
+              checkPage(4);
+              const lc = linea.trim(), ci = lc.indexOf(':');
+              if (ci > 0) {
+                doc.setFont('helvetica', 'bold'); doc.setTextColor(...cNegro);
+                doc.text(lc.slice(0, ci), margin + 4, y + 2.5);
+                const aw = doc.getTextWidth(lc.slice(0, ci));
+                doc.setFont('helvetica', 'italic'); doc.setTextColor(105, 105, 105);
+                doc.text(lc.slice(ci), margin + 4 + aw, y + 2.5);
+              } else {
+                doc.text(lc, margin + 4, y + 2.5);
+              }
+              y += 3.8;
+            });
+            y += 1;
+          } else {
+            doc.splitTextToSize(prod.descripcion, contentW - 10).slice(0, 2).forEach(ln => {
+              doc.text(ln, margin + 4, y + 2.5); y += 3.5;
+            });
+            y += 0.5;
+          }
+        } else { y += 1.5; }
+      });
+      y += 4;
+    });
+
+    const total = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= total; i++) {
+      doc.setPage(i);
+      doc.setFillColor(...cNegro); doc.rect(0, H - 14, W, 14, 'F');
+      doc.setFillColor(...cSalmon); doc.rect(0, H - 14, W, 1.5, 'F');
+      doc.setTextColor(...cWhite); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+      doc.text('Taitara – Sushi & Rolls', margin, H - 6);
+      doc.setTextColor(170, 170, 170);
+      doc.text(`Página ${i} de ${total}`, W - margin, H - 6, { align: 'right' });
+    }
+
+    doc.save('Carta_Taitara.pdf');
+
+  } catch (err) {
+    console.error('Error PDF:', err);
+    alert('Error al generar el PDF. Intenta nuevamente.');
+  } finally {
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Carta PDF`;
+    btn.disabled = false;
+  }
 }
 
 document.getElementById('descargar-carta').addEventListener('click', generarPDF);
 
-async function generarPDF() {
-    // Inicialización de jsPDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Variables de control de posición y layout
-    let y = 30; // Posición vertical inicial
-    const pageHeight = 280; // Altura útil de la página
-    const margin = 20; // Margen izquierdo
-    
-    // Paleta de colores del diseño
-    const esmeralda = [46, 139, 87];   // Color principal para títulos
-    const dorado = [212, 175, 55];     // Color para headers de familia
-    const salmon = [255, 111, 97];     // Color para precios
-    const grayDark = [85, 85, 85];     // Color para texto secundario
-
-    // === CREACIÓN DEL ENCABEZADO ===
-    // Fondo verde esmeralda para el header
-    doc.setFillColor(...esmeralda);
-    doc.rect(0, 0, 210, 50, 'F'); // Rectángulo que cubre todo el ancho
-    
-    // Función que carga el logo de forma asíncrona
-    const cargarLogo = () => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            
-            // Callback cuando el logo se carga correctamente
-            img.onload = () => {
-                try {
-                    // Convertir imagen a canvas para obtener data URL
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    
-                    // Calcular dimensiones y posición centrada del logo
-                    const logoWidth = 60;
-                    const logoHeight = (img.height / img.width) * logoWidth;
-                    const logoX = (210 - logoWidth) / 2; // Centrado horizontal
-                    const logoY = (50 - logoHeight) / 2;  // Centrado vertical en el header
-                    
-                    // Agregar logo al PDF
-                    doc.addImage(imgData, 'PNG', logoX, logoY, logoWidth, logoHeight);
-                    console.log("Logo agregado correctamente");
-                    resolve();
-                } catch (error) {
-                    console.log("Error procesando logo:", error);
-                    // Fallback: texto en lugar de logo
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(24);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text("Taitara", 105, 25, { align: "center" });
-                    resolve(); // Resolvemos aunque haya error
-                }
-            };
-            
-            // Callback si el logo no se puede cargar
-            img.onerror = (error) => {
-                console.log("Error cargando logo:", error);
-                // Fallback: usar texto en lugar de imagen
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(24);
-                doc.setFont('helvetica', 'bold');
-                doc.text("Taitara", 105, 18, { align: "center" });
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'normal');
-                resolve(); // Resolvemos aunque haya error
-            };
-            
-            // Configurar y cargar la imagen del logo
-            img.crossOrigin = "anonymous"; // Para evitar problemas de CORS
-            img.src = 'assets/img/logotaitara.png';
-        });
-    };
-    
-    // Función principal que genera el contenido del PDF
-    const generarContenido = async () => {
-        try {
-            // === OBTENCIÓN DE DATOS CSV ===
-            // URL del CSV público de Google Sheets
-            const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyXC6GwAi6XiQM782lchykl-n0AOlb9Purnflp5SX_9mJOc9JORG2A-3CBWthXMAJdUNn7J6cT3fCP/pub?gid=0&single=true&output=csv";
-            // Proxy para evitar problemas de CORS
-            const proxyURL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(csvURL);
-            
-            // Fetch de los datos
-            const response = await fetch(proxyURL);
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
-            const csvData = await response.text();
-            // Dividir por líneas y filtrar líneas vacías
-            const rows = csvData.split(/\r?\n/).filter(row => row.trim() !== '');
-
-            // === PROCESAMIENTO DE DATOS ===
-            // Estructuras para agrupar productos por familia
-            const familias = {};
-            const ordenFamilias = []; // Mantiene el orden de aparición
-
-            // Procesar cada fila del CSV (saltando el header)
-            rows.slice(1).forEach(row => {
-                // Parsear CSV respetando comillas
-                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                const familia = cols[1].replace(/^"|"$/g, '').trim();
-                
-                // === FORMATEO DE PRECIOS ===
-                // Obtener precio sin comillas
-                const precioRaw = cols[4].replace(/^"|"$/g, '').trim();
-                const precioNumero = parseFloat(precioRaw);
-                
-                // Formatear precio con separadores de miles chilenos
-                const precioFormateado = isNaN(precioNumero) ? precioRaw : 
-                    precioNumero % 1 === 0 ? 
-                    `$${precioNumero.toLocaleString('es-CL')}` : 
-                    `$${precioNumero.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-
-                // Crear objeto producto
-                const producto = {
-                    id: cols[0].replace(/^"|"$/g, '').trim(),
-                    familia: familia,
-                    nombre: cols[2].replace(/^"|"$/g, '').trim(),
-                    descripcion: cols[3].replace(/^"|"$/g, '').trim(),
-                    precio: precioFormateado
-                };
-
-                // Agrupar por familia
-                if (!familias[familia]) {
-                    familias[familia] = [];
-                    ordenFamilias.push(familia);
-                }
-                familias[familia].push(producto);
-            });
-
-            // === GENERACIÓN DEL PDF ===
-            // Establecer posición inicial después del header
-            y = 65;
-            
-            // Iterar por cada familia de productos
-            ordenFamilias.forEach((familia, familiaIndex) => {
-                // Control de página para título de familia
-                if (y > pageHeight - 20) {
-                    doc.addPage();
-                    y = 30;
-                }
-
-                // === TÍTULO DE FAMILIA ===
-                // Fondo dorado para el título
-                doc.setFillColor(...dorado);
-                doc.rect(margin, y - 4, 170, 10, 'F');
-                
-                // Texto del título de familia
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.text(familia.toUpperCase(), margin + 4, y + 1);
-                
-                y += 12; // Espacio después del título de familia
-
-                // === PRODUCTOS DE LA FAMILIA ===
-                familias[familia].forEach((prod, prodIndex) => {
-                    // Procesar descripción para promociones en PDF
-                    let descripcionPDF = prod.descripcion;
-                    const esPromocion = familia.toLowerCase() === 'promociones';
-                    
-                    // Calcular espacio necesario para el producto
-                    let espacioNecesario;
-                    if (esPromocion && descripcionPDF.includes('|')) {
-                        // Para promociones con múltiples líneas, calcular espacio extra
-                        const lineasDescripcion = descripcionPDF.split('|').length;
-                        espacioNecesario = 9 + (lineasDescripcion * 4); // Espacio base + líneas extra
-                    } else {
-                        espacioNecesario = prod.descripcion && prod.descripcion.trim() !== '' ? 12 : 9;
-                    }
-                    
-                    // Control de página para productos
-                    if (y > pageHeight - espacioNecesario) {
-                        doc.addPage();
-                        y = 30;
-                    }
-
-                    // === LÍNEA PRINCIPAL: ID, NOMBRE Y PRECIO ===
-                    const idProducto = prod.id;
-                    const nombreProducto = prod.nombre;
-                    const precio = prod.precio;
-                    
-                    // ID del producto (pequeño y discreto)
-                    doc.setTextColor(120, 120, 120);
-                    doc.setFontSize(7);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(idProducto, margin, y);
-                    
-                    // Calcular posición del nombre después del ID
-                    const anchoId = doc.getTextWidth(idProducto);
-                    const xNombre = margin + anchoId + 3; // 3 puntos de separación
-                    
-                    // Nombre del producto
-                    doc.setTextColor(...esmeralda);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text(nombreProducto, xNombre, y);
-                    
-                    // === LÍNEA DE PUNTOS DE RELLENO ===
-                    // Calcular espacio para los puntos
-                    const anchoNombre = doc.getTextWidth(nombreProducto);
-                    const anchoPrecio = doc.getTextWidth(precio);
-                    const espacioDisponible = 170 - xNombre;
-                    const espacioParaPuntos = espacioDisponible - anchoNombre - anchoPrecio - 5;
-                    
-                    // Generar puntos de relleno
-                    const anchoPunto = doc.getTextWidth('.');
-                    const cantidadPuntos = Math.floor(espacioParaPuntos / anchoPunto);
-                    const puntos = '.'.repeat(Math.max(3, cantidadPuntos));
-                    
-                    // Dibujar puntos de relleno
-                    doc.setTextColor(150, 150, 150);
-                    const xPuntos = xNombre + anchoNombre + 2;
-                    doc.text(puntos, xPuntos, y);
-                    
-                    // Precio alineado a la derecha
-                    doc.setTextColor(...salmon);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(precio, 170, y, { align: "right" });
-
-                    // Espacio entre productos
-                    y += 5; 
-
-                    // === DESCRIPCIÓN DEL PRODUCTO ===
-                    if (prod.descripcion && prod.descripcion.trim() !== '') {
-                        doc.setTextColor(...grayDark);
-                        doc.setFontSize(7);
-                        doc.setFont('helvetica', 'italic');
-                        
-                        if (esPromocion && descripcionPDF.includes('|')) {
-                            // Para promociones, dividir por | y mostrar cada línea
-                            const lineas = descripcionPDF.split('|');
-                            lineas.forEach((linea, index) => {
-                                const lineaLimpia = linea.trim();
-                                
-                                // Buscar texto antes de : para ponerlo en negrita
-                                const colonIndex = lineaLimpia.indexOf(':');
-                                if (colonIndex > 0) {
-                                    const nombreSubProducto = lineaLimpia.substring(0, colonIndex);
-                                    const restoTexto = lineaLimpia.substring(colonIndex);
-                                    
-                                    // Nombre del sub-producto en negrita
-                                    doc.setFont('helvetica', 'bold');
-                                    doc.text(nombreSubProducto, margin + 3, y);
-                                    
-                                    // Calcular posición para el resto del texto
-                                    const anchoNombre = doc.getTextWidth(nombreSubProducto);
-                                    
-                                    // Resto del texto en cursiva normal
-                                    doc.setFont('helvetica', 'italic');
-                                    doc.text(restoTexto, margin + 3 + anchoNombre, y);
-                                } else {
-                                    // Si no hay :, texto normal
-                                    doc.text(lineaLimpia, margin + 3, y);
-                                }
-                                y += 4; // Espacio entre líneas
-                            });
-                            y += 3; // Espacio después de todas las líneas
-                        } else if (esPromocion) {
-                            // Para promociones sin |, pero con :
-                            const colonIndex = descripcionPDF.indexOf(':');
-                            if (colonIndex > 0) {
-                                const nombreSubProducto = descripcionPDF.substring(0, colonIndex);
-                                const restoTexto = descripcionPDF.substring(colonIndex);
-                                
-                                // Nombre del sub-producto en negrita
-                                doc.setFont('helvetica', 'bold');
-                                doc.text(nombreSubProducto, margin + 3, y);
-                                
-                                // Calcular posición para el resto del texto
-                                const anchoNombre = doc.getTextWidth(nombreSubProducto);
-                                
-                                // Resto del texto en cursiva normal
-                                doc.setFont('helvetica', 'italic');
-                                doc.text(restoTexto, margin + 3 + anchoNombre, y);
-                            } else {
-                                doc.text(descripcionPDF, margin + 3, y);
-                            }
-                            y += 7; // Espacio después de descripción
-                        } else {
-                            doc.text(descripcionPDF, margin + 3, y); // Indentado 3 puntos
-                            y += 7; // Espacio después de descripción
-                        }
-                    } else {
-                        y += 1; // Espacio mínimo si no hay descripción
-                    }
-                });
-                y += 3; // Separación entre familias
-            });
-
-            // === FOOTER EN TODAS LAS PÁGINAS ===
-            const totalPages = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= totalPages; i++) {
-                doc.setPage(i);
-                
-                // Línea decorativa dorada
-                doc.setDrawColor(...dorado);
-                doc.setLineWidth(1);
-                doc.line(margin, 285, 190, 285);
-                
-                // Nombre del restaurante centrado
-                doc.setTextColor(...grayDark);
-                doc.setFontSize(8);
-                doc.setFont('helvetica', 'normal');
-                doc.text("Taitara", 105, 290, { align: "center" });
-                
-                // Número de página alineado a la derecha
-                doc.text(`Página ${i} de ${totalPages}`, 190, 290, { align: "right" });
-            }
-
-            // === GUARDAR EL PDF ===
-            // Esta línea ahora está al final del procesamiento completo
-            doc.save('Carta_Taitara.pdf');
-            console.log("PDF generado exitosamente");
-            
-        } catch (error) {
-            console.error("Error generando el PDF:", error);
-            alert("Hubo un error al generar el PDF. Intenta nuevamente.");
-        }
-    };
-
-    // === FLUJO PRINCIPAL ===
-    try {
-        // 1. Primero cargar el logo
-        await cargarLogo();
-        
-        // 2. Luego generar el contenido y guardar
-        await generarContenido();
-        
-    } catch (error) {
-        console.error("Error en el proceso de generación del PDF:", error);
-        alert("Hubo un error al generar el PDF. Intenta nuevamente.");
-    }
-}
-
-// Función para mostrar los 3 productos más vendidos en el carrusel
-function mostrarProductosMasVendidos(productos) {
-    const productosOrdenados = productos.sort((a, b) => b.cantidadVendida - a.cantidadVendida);
-    const masVendidos = productosOrdenados.slice(0, 3);
-    const carruselInner = document.querySelector('#carouselMasVendidos .carousel-inner');
-    carruselInner.innerHTML = '';
-
-    masVendidos.forEach((producto, index) => {
-        const carruselItem = document.createElement('div');
-        carruselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-        carruselItem.innerHTML = `
-            <div class="card">
-                <img src="assets/img/${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
-                <div class="card-body">
-                    <p class="producto-id">Cod. Producto: ${producto.id}</p>
-                    <h6 class="producto-nombre">${producto.nombre}</h6>
-                    <p class="fw-lighter fs-8 producto-descripcion">${producto.descripcion}</p>
-                </div>
-            </div>
-        `;
-        carruselInner.appendChild(carruselItem);
-    });
-}
-
-// Iniciar carga de datos al cargar la página
-document.addEventListener("DOMContentLoaded", cargarDatos);
+cargarDatos();
